@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Professional Server</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1>Professional Server is Running</h1>
+  
+  <h2>Dynamic Projects (from <code>/dynamics</code>)</h2>
+  <ul>
+    {{projectList}}
+  </ul>
+  
+  <h2>API Endpoints (from <code>/api</code>)</h2>
+  <ul>
+    <li><a href="/api/info" target="_blank">/api/info</a></li>
+    <li><a href="/api/user/Cascade" target="_blank">/api/user/Cascade</a></li>
+  </ul>
+
+  <h2>Shared Static Assets (from <code>/public</code>)</h2>
+  <p>This page's stylesheet is served from the public directory (<a href="/style.css" target="_blank">/style.css</a>).</p>
+</body>
+</html>
