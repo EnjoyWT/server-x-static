@@ -1,14 +1,19 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
+const express = require("express");
+const path = require("path");
+const fs = require("fs");
 
-const DYNAMICS_DIR = path.join(__dirname, '../../dynamics');
+const DYNAMICS_DIR = path.join(__dirname, "../../dynamics");
 
 module.exports = (req, res, next) => {
-  const projectName = req.path.split('/')[1];
+  const pathSegments = req.path.split("/").filter((segment) => segment !== "");
+  const projectName = pathSegments[0];
 
   // Ignore requests that are not for a project
-  if (!projectName || projectName.startsWith('.') || ['api', 'public'].includes(projectName)) {
+  if (
+    !projectName ||
+    projectName.startsWith(".") ||
+    ["api", "public", "help"].includes(projectName)
+  ) {
     return next();
   }
 

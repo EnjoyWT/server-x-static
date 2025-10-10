@@ -58,14 +58,14 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(express.static(PUBLIC_DIR));
 
 // 2. Serve project-specific files from /dynamics
-app.use(dynamicProjectMiddleware);
+app.use("/dyn", dynamicProjectMiddleware);
 
 // --- Route Registration ---
 // 3. API routes
-app.use("/api", apiRoutes);
+app.use("/dyn/api", apiRoutes);
 
 // 4. Home page route
-app.use("/help", homeRoutes);
+app.use("/dyn/help", homeRoutes);
 
 // --- Error Handling ---
 // Placed after all routes to catch unhandled requests
