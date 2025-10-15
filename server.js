@@ -5,6 +5,27 @@ const express = require("express");
 const path = require("path");
 const helmet = require("helmet");
 const fs = require("fs");
+const os = require("os");
+
+// --- Import Configuration ---
+const config = require("./src/config");
+
+// --- Process Error Handling ---
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught Exception:", err.message);
+  console.error("Stack:", err.stack);
+  console.error("Time:", new Date().toISOString());
+  // Log error but keep the process running
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("❌ Unhandled Rejection at:", promise);
+  console.error("Reason:", reason);
+  console.error("Time:", new Date().toISOString());
+  // Log error but keep the process running
+});
 
 // --- Import Routes and Middleware ---
 const apiRoutes = require("./src/api");
@@ -14,11 +35,12 @@ const { notFound, errorHandler } = require("./src/middleware/error.middleware");
 
 // --- App Initialization ---
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || config.DEFAULT_PORT;
+const { DYN_PREFIX } = config;
 
 // --- Directory Definitions & Creation ---
-const DYNAMICS_DIR = path.join(__dirname, "dynamics");
-const PUBLIC_DIR = path.join(__dirname, "public");
+const DYNAMICS_DIR = path.join(__dirname, config.DYNAMICS_DIR);
+const PUBLIC_DIR = path.join(__dirname, config.PUBLIC_DIR);
 [DYNAMICS_DIR, PUBLIC_DIR].forEach((dir) => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir);
 });
@@ -58,14 +80,26 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(express.static(PUBLIC_DIR));
 
 // 2. Serve project-specific files from /dynamics
-app.use("/dyn", dynamicProjectMiddleware);
+app.use(DYN_PREFIX, dynamicProjectMiddleware);
 
 // --- Route Registration ---
-// 3. API routes
-app.use("/dyn/api", apiRoutes);
+// 3. Health check endpoint
+app.get(`${DYN_PREFIX}/health`, (req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: require("./package.json").version,
+    environment: process.env.NODE_ENV || "development",
+    path: req.path,
+  });
+});
 
-// 4. Home page route
-app.use("/dyn/help", homeRoutes);
+// 4. API routes
+app.use(`${DYN_PREFIX}/api`, apiRoutes);
+
+// 5. Home page route
+app.use(`${DYN_PREFIX}/help`, homeRoutes);
 
 // --- Error Handling ---
 // Placed after all routes to catch unhandled requests
@@ -73,11 +107,28 @@ app.use(notFound);
 app.use(errorHandler);
 
 // --- Server Activation ---
-app.listen(PORT, () => {
+// Get local IPv4 address
+function getLocalIPv4() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === "IPv4" && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return "localhost";
+}
+
+app.listen(PORT, "0.0.0.0", () => {
+  const localIP = getLocalIPv4();
   console.log(
     `✅ Server is running in ${
       process.env.NODE_ENV || "development"
     } mode on port ${PORT}`
   );
+  console.log(`   Local:    http://localhost:${PORT}`);
+  console.log(`   Network:  http://${localIP}:${PORT}`);
+  console.log(`   External: http://0.0.0.0:${PORT}`);
   console.log(`   Press CTRL-C to stop\n`);
 });

@@ -1,7 +1,11 @@
 const fs = require("fs").promises; // Using promise-based fs
 const path = require("path");
 
-const DYNAMICS_DIR = path.join(__dirname, "../../dynamics");
+// --- Import Configuration ---
+const config = require("../config");
+
+const DYNAMICS_DIR = path.join(__dirname, "../../", config.DYNAMICS_DIR);
+const { DYN_PREFIX } = config;
 
 /**
  * @desc Renders the home page
@@ -23,7 +27,10 @@ exports.getHomePage = async (req, res, next) => {
       "<li>No projects found. Please add project folders to the `dynamics` directory.</li>";
     if (projectDirs.length > 0) {
       projectListHtml = projectDirs
-        .map((dir) => `<li><a href="/dyn/${dir}/">/dyn/${dir}/</a></li>`)
+        .map(
+          (dir) =>
+            `<li><a href="${DYN_PREFIX}/${dir}/">${DYN_PREFIX}/${dir}/</a></li>`
+        )
         .join("\n    ");
     }
 
