@@ -1,8 +1,11 @@
-const fs = require("fs").promises; // Using promise-based fs
+const express = require("express");
+const fs = require("fs").promises;
 const path = require("path");
 
 // --- Import Configuration ---
 const config = require("../config");
+
+const router = express.Router();
 
 const DYNAMICS_DIR = path.join(__dirname, "../../", config.DYNAMICS_DIR);
 const { DYN_PREFIX } = config;
@@ -11,10 +14,10 @@ const { DYN_PREFIX } = config;
  * @desc Renders the home page
  * @route GET /
  */
-exports.getHomePage = async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
     // 1. Read the HTML template
-    const templatePath = path.join(__dirname, "../views/home.template.html");
+    const templatePath = path.join(__dirname, "../views/home.html");
     let template = await fs.readFile(templatePath, "utf-8");
 
     // 2. Generate the dynamic project list
@@ -54,4 +57,6 @@ exports.getHomePage = async (req, res, next) => {
       next(error); // Pass other errors to the central error handler
     }
   }
-};
+});
+
+module.exports = router;

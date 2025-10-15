@@ -2,9 +2,9 @@
   "name": "dangjian",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node app.js",
     "dev": "NODE_ENV=development node server.js"
   },
   "keywords": [],

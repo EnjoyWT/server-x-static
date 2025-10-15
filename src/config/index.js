@@ -5,7 +5,7 @@
 
 module.exports = {
   // Dynamic project route prefix
-  DYN_PREFIX: "/dyn2",
+  DYN_PREFIX: "/dyn",
 
   // Server configuration
   DEFAULT_PORT: 8080,

@@ -2,7 +2,9 @@
  * 404 Not Found handler
  */
 exports.notFound = (req, res, next) => {
-  res.status(404).json({ success: false, message: `Not Found - ${req.originalUrl}` });
+  res
+    .status(404)
+    .json({ success: false, message: `Not Found - ${req.originalUrl}` });
 };
 
 /**
@@ -15,6 +17,6 @@ exports.errorHandler = (err, req, res, next) => {
     success: false,
     message: err.message,
     // Show stack trace in development mode only
-    stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack,
+    stack: process.env.NODE_ENV === "production" ? "🥞" : err.stack,
   });
 };
