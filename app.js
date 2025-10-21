@@ -6,6 +6,7 @@ const path = require("path");
 const helmet = require("helmet");
 const fs = require("fs");
 const os = require("os");
+const compression = require("compression");
 
 // --- Import Configuration ---
 const config = require("./src/config");
@@ -74,6 +75,9 @@ app.use(
 ); // Apply security headers with custom CSP
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
+// Enable gzip compression for all responses (before static and routes)
+app.use(compression());
 
 // --- Static & Dynamic Asset Serving ---
 // 1. Serve shared static files from /public
