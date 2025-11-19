@@ -1,11 +1,10 @@
 {
-  "name": "dangjian",
+  "name": "server-x-static",
   "version": "1.0.0",
-  "description": "",
+  "description": "专业的静态文件服务器，支持动态项目管理和API接口",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "NODE_ENV=development node server.js"
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "",

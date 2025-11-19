@@ -8,7 +8,7 @@ module.exports = {
   DYN_PREFIX: "/dyn",
 
   // Server configuration
-  DEFAULT_PORT: 8080,
+  DEFAULT_PORT: 6002,
 
   // Directory paths (relative to project root)
   DYNAMICS_DIR: "dynamics",

@@ -10,7 +10,8 @@
       "Bash(cat:*)",
       "Bash(test:*)",
       "Bash(gzip:*)",
-      "Bash(brotli --version)"
+      "Bash(brotli --version)",
+      "Bash(brotli:*)"
     ],
     "deny": [],
     "ask": []
