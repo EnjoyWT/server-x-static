@@ -1,10 +1,40 @@
+const fs = require("fs").promises;
+const path = require("path");
+
+function acceptsHtml(req) {
+  return req.accepts(["html", "json"]) === "html" && !req.originalUrl.startsWith("/api/");
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>'"]/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "'": "&#39;",
+    '"': "&quot;",
+  }[char]));
+}
+
 /**
  * 404 Not Found handler
  */
-exports.notFound = (req, res, next) => {
-  res
-    .status(404)
-    .json({ success: false, message: `Not Found - ${req.originalUrl}` });
+exports.notFound = async (req, res, next) => {
+  if (!acceptsHtml(req)) {
+    return res
+      .status(404)
+      .json({ success: false, message: `Not Found - ${req.originalUrl}` });
+  }
+
+  try {
+    const templatePath = path.join(__dirname, "../views/404.html");
+    const template = await fs.readFile(templatePath, "utf-8");
+    res
+      .status(404)
+      .type("html")
+      .send(template.replaceAll("{{REQUEST_PATH}}", escapeHtml(req.originalUrl)));
+  } catch (error) {
+    next(error);
+  }
 };
 
 /**

@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>项目管理 - Server X Static</title>
+    <style>
+      :root {
+        --bg: #f6f8fb;
+        --panel: #ffffff;
+        --panel-strong: #f8fafc;
+        --border: #e2e8f0;
+        --border-active: rgba(22, 163, 74, 0.38);
+        --text: #0f172a;
+        --muted: #64748b;
+        --green: #22c55e;
+        --gray: #cbd5e1;
+        --red: #ef4444;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(34, 197, 94, 0.12),
+            transparent 32rem
+          ),
+          radial-gradient(
+            circle at top right,
+            rgba(59, 130, 246, 0.1),
+            transparent 28rem
+          ),
+          linear-gradient(180deg, #ffffff 0%, var(--bg) 42%);
+      }
+
+      main {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 24px 0 56px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 48px;
+      }
+
+      .brand {
+        margin: 0;
+        color: #0f172a;
+        font-size: 25px;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        line-height: 1;
+      }
+
+      .stats {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .stat-item {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 5px;
+      }
+
+      .stat-item strong {
+        color: #334155;
+        font-size: 14px;
+        line-height: 1;
+        font-weight: 750;
+      }
+
+      .toolbar {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 100%;
+        margin-bottom: 16px;
+        padding: 6px;
+        border: 1px solid var(--border);
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.045);
+      }
+
+      .search-input {
+        width: 260px;
+        max-width: 42vw;
+        min-height: 34px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        padding: 0 10px;
+        color: var(--text);
+        background: #f8fafc;
+        font-size: 13px;
+        outline: none;
+      }
+
+      .search-input:focus {
+        border-color: rgba(37, 99, 235, 0.28);
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+      }
+
+      .refresh-button {
+        border: 1px solid rgba(226, 232, 240, 0.62);
+        border-radius: 10px;
+        padding: 7px 11px;
+        color: #475569;
+        background: rgba(255, 255, 255, 0.72);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .refresh-button:hover {
+        border-color: rgba(203, 213, 225, 0.72);
+        background: rgba(248, 250, 252, 0.86);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 260px));
+        justify-content: start;
+        gap: 12px;
+      }
+
+      .card {
+        position: relative;
+        min-height: 108px;
+        padding: 13px 14px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: linear-gradient(145deg, var(--panel), var(--panel-strong));
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+      }
+
+      .card.enabled {
+        border-color: var(--border-active);
+      }
+
+      .card.disabled {
+        opacity: 0.86;
+      }
+
+      .card-top,
+      .card-bottom {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .card-top {
+        margin-bottom: 12px;
+      }
+
+      .card-bottom {
+        align-items: center;
+        gap: 12px;
+      }
+
+      .project-name {
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.18;
+        letter-spacing: -0.025em;
+        word-break: break-word;
+      }
+
+      .path-row {
+        min-width: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .project-path {
+        min-width: 0;
+        color: #2563eb;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", monospace;
+        font-size: 13px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .copy-button {
+        flex: 0 0 auto;
+        border: 1px solid #dbeafe;
+        border-radius: 999px;
+        padding: 4px 8px;
+        color: #2563eb;
+        background: #eff6ff;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .status-badge {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .status-badge::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #94a3b8;
+      }
+
+      .status-badge.enabled-text {
+        color: #15803d;
+      }
+
+      .status-badge.enabled-text::before {
+        background: var(--green);
+      }
+
+      .switch {
+        position: relative;
+        display: inline-flex;
+        flex: 0 0 auto;
+        width: 38px;
+        height: 22px;
+        cursor: pointer;
+      }
+
+      .switch input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        inset: 0;
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        border-radius: 999px;
+        background: var(--gray);
+        transition: 180ms ease;
+      }
+
+      .slider::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        left: 2px;
+        top: 2px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 3px 8px rgba(15, 23, 42, 0.22);
+        transition: 180ms ease;
+      }
+
+      .switch input:checked + .slider {
+        border-color: rgba(34, 197, 94, 0.68);
+        background: var(--green);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+      }
+
+      .switch input:checked + .slider::after {
+        transform: translateX(16px);
+      }
+
+      .switch input:disabled + .slider {
+        cursor: wait;
+        filter: saturate(0.55);
+      }
+
+      .empty,
+      .error {
+        grid-column: 1 / -1;
+        padding: 32px;
+        border: 1px dashed var(--border);
+        border-radius: 24px;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.72);
+        text-align: center;
+      }
+
+      .error {
+        border-color: rgba(239, 68, 68, 0.45);
+        color: #b91c1c;
+      }
+
+      @media (max-width: 720px) {
+        main {
+          width: min(100% - 24px, 1120px);
+          padding-top: 28px;
+        }
+
+        .topbar,
+        .toolbar {
+          display: flex;
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .stats {
+          justify-content: space-between;
+        }
+
+        .search-input {
+          width: 100%;
+          max-width: none;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="topbar">
+        <p class="brand">SERVER-X-STATIC</p>
+        <div class="stats" aria-label="项目统计">
+          <span class="stat-item">全部 <strong id="totalCount">0</strong></span>
+          <span class="stat-item">启用 <strong id="enabledCount">0</strong></span>
+          <span class="stat-item">关闭 <strong id="disabledCount">0</strong></span>
+        </div>
+      </section>
+
+      <section class="toolbar">
+        <input
+          class="search-input"
+          id="searchInput"
+          type="search"
+          placeholder="搜索项目名或路径"
+          autocomplete="off"
+        />
+        <button class="refresh-button" type="button" id="refreshButton">
+          刷新
+        </button>
+      </section>
+
+      <section class="grid" id="projectGrid" aria-live="polite"></section>
+    </main>
+
+    <script>
+      const grid = document.querySelector("#projectGrid");
+      const refreshButton = document.querySelector("#refreshButton");
+      const searchInput = document.querySelector("#searchInput");
+      const totalCount = document.querySelector("#totalCount");
+      const enabledCountEl = document.querySelector("#enabledCount");
+      const disabledCount = document.querySelector("#disabledCount");
+      let allProjects = [];
+
+      function escapeHtml(value) {
+        return String(value).replace(
+          /[&<>'"]/g,
+          (char) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              "'": "&#39;",
+              '"': "&quot;",
+            })[char],
+        );
+      }
+
+      function updateStats(projects = allProjects) {
+        const total = projects.length;
+        const enabled = projects.filter((project) => project.enabled).length;
+        totalCount.textContent = total;
+        enabledCountEl.textContent = enabled;
+        disabledCount.textContent = total - enabled;
+      }
+
+      function getFilteredProjects() {
+        const keyword = searchInput.value.trim().toLowerCase();
+        if (!keyword) return allProjects;
+        return allProjects.filter((project) => {
+          return (
+            project.name.toLowerCase().includes(keyword) ||
+            project.path.toLowerCase().includes(keyword)
+          );
+        });
+      }
+
+      function renderProjects(projects) {
+        updateStats(allProjects);
+
+        if (allProjects.length === 0) {
+          grid.innerHTML =
+            '<div class="empty">暂无项目。把静态项目文件夹放进 <code>dynamics/</code> 后刷新即可。</div>';
+          return;
+        }
+
+        if (projects.length === 0) {
+          grid.innerHTML = '<div class="empty">没有匹配的项目。</div>';
+          return;
+        }
+
+        grid.innerHTML = projects
+          .map((project) => {
+            const statusClass = project.enabled ? "enabled" : "disabled";
+            const textClass = project.enabled ? "enabled-text" : "disabled-text";
+            const statusText = project.enabled ? "已启用" : "已关闭";
+
+            return `
+              <article class="card ${statusClass}" data-project-card="${escapeHtml(project.name)}">
+                <div class="card-top">
+                  <h2 class="project-name">${escapeHtml(project.name)}</h2>
+                  <label class="switch" aria-label="切换 ${escapeHtml(project.name)} 启用状态">
+                    <input type="checkbox" data-project-toggle="${escapeHtml(project.name)}" ${project.enabled ? "checked" : ""}>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="card-bottom">
+                  <div class="path-row">
+                    <a class="project-path" href="${escapeHtml(project.path)}" target="_blank" rel="noreferrer">${escapeHtml(project.path)}</a>
+                    <button class="copy-button" type="button" data-copy-path="${escapeHtml(project.path)}">复制</button>
+                  </div>
+                  <span class="status-badge ${textClass}">${statusText}</span>
+                </div>
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      async function loadProjects() {
+        grid.innerHTML = "";
+
+        try {
+          const response = await fetch("/admin/projects");
+          const payload = await response.json();
+
+          if (!response.ok || !payload.success) {
+            throw new Error(payload.message || "读取项目失败");
+          }
+
+          allProjects = payload.data.projects || [];
+          renderProjects(getFilteredProjects());
+        } catch (error) {
+          grid.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+        }
+      }
+
+      function setCardState(card, enabled) {
+        card.classList.toggle("enabled", enabled);
+        card.classList.toggle("disabled", !enabled);
+
+        const statusText = card.querySelector(".status-badge");
+        if (statusText) {
+          statusText.textContent = enabled ? "已启用" : "已关闭";
+          statusText.classList.toggle("enabled-text", enabled);
+          statusText.classList.toggle("disabled-text", !enabled);
+        }
+      }
+
+      async function updateProject(name, enabled, input) {
+        const project = allProjects.find((item) => item.name === name);
+        const card = grid.querySelector(`[data-project-card="${CSS.escape(name)}"]`);
+        input.disabled = true;
+
+        if (project) project.enabled = enabled;
+        if (card) setCardState(card, enabled);
+        updateStats(allProjects);
+
+        try {
+          const response = await fetch(`/admin/projects/${encodeURIComponent(name)}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ enabled }),
+          });
+          const payload = await response.json();
+
+          if (!response.ok || !payload.success) {
+            throw new Error(payload.message || "更新失败");
+          }
+        } catch (error) {
+          input.checked = !enabled;
+          if (project) project.enabled = !enabled;
+          if (card) setCardState(card, !enabled);
+          updateStats(allProjects);
+          alert(error.message);
+        } finally {
+          input.disabled = false;
+        }
+      }
+
+      grid.addEventListener("change", (event) => {
+        const input = event.target.closest("[data-project-toggle]");
+        if (!input) return;
+        updateProject(input.dataset.projectToggle, input.checked, input);
+      });
+
+      grid.addEventListener("click", async (event) => {
+        const button = event.target.closest("[data-copy-path]");
+        if (!button) return;
+
+        try {
+          await navigator.clipboard.writeText(button.dataset.copyPath);
+          button.textContent = "已复制";
+          window.setTimeout(() => {
+            button.textContent = "复制";
+          }, 1200);
+        } catch (error) {
+          alert("复制失败");
+        }
+      });
+
+      searchInput.addEventListener("input", () => {
+        renderProjects(getFilteredProjects());
+      });
+
+      refreshButton.addEventListener("click", loadProjects);
+      loadProjects();
+    </script>
+  </body>
+</html>

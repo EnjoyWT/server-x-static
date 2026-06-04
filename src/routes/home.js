@@ -4,10 +4,10 @@ const path = require("path");
 
 // --- Import Configuration ---
 const config = require("../config");
+const projectStatus = require("../services/projectStatus");
 
 const router = express.Router();
 
-const DYNAMICS_DIR = path.join(__dirname, "../../", config.DYNAMICS_DIR);
 const { DYN_PREFIX } = config;
 
 /**
@@ -20,19 +20,17 @@ router.get("/", async (req, res, next) => {
     const templatePath = path.join(__dirname, "../views/home.html");
     let template = await fs.readFile(templatePath, "utf-8");
 
-    // 2. Generate the dynamic project list
-    const dirents = await fs.readdir(DYNAMICS_DIR, { withFileTypes: true });
-    const projectDirs = dirents
-      .filter((dirent) => dirent.isDirectory())
-      .map((dirent) => dirent.name);
+    // 2. Generate the enabled dynamic project list
+    const projects = await projectStatus.listProjects();
+    const enabledProjects = projects.filter((project) => project.enabled);
 
     let projectListHtml =
-      "<li>No projects found. Please add project folders to the `dynamics` directory.</li>";
-    if (projectDirs.length > 0) {
-      projectListHtml = projectDirs
+      "<li>No enabled projects found. Open <a href=\"/admin/\">/admin/</a> to enable projects, or add project folders to the `dynamics` directory.</li>";
+    if (enabledProjects.length > 0) {
+      projectListHtml = enabledProjects
         .map(
-          (dir) =>
-            `<li><a href="${DYN_PREFIX}/${dir}/">${DYN_PREFIX}/${dir}/</a></li>`
+          (project) =>
+            `<li><a href="${project.path}">${project.path}</a></li>`
         )
         .join("\n    ");
     }

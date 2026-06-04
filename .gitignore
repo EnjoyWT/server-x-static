@@ -14,5 +14,9 @@ lerna-debug.log*
 
 # Coverage directory
 coverage
+
+# Runtime state
+data/project-status.json
+
 dynamics/danmaku
 dynamics

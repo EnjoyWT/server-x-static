@@ -4,10 +4,11 @@ const fs = require("fs");
 
 // --- Import Configuration ---
 const config = require("../config");
+const projectStatus = require("../services/projectStatus");
 
 const DYNAMICS_DIR = path.join(__dirname, "../../", config.DYNAMICS_DIR);
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   const pathSegments = req.path.split("/").filter((segment) => segment !== "");
   const projectName = pathSegments[0];
 
@@ -18,6 +19,16 @@ module.exports = (req, res, next) => {
     config.RESERVED_ROUTES.includes(projectName)
   ) {
     return next();
+  }
+
+  try {
+    const enabled = await projectStatus.isProjectEnabled(projectName);
+    if (!enabled) {
+      return next();
+    }
+  } catch (error) {
+    console.error(`❌ Error checking project status '${projectName}':`, error.message);
+    // Fail-open: project status failures should not block static project access.
   }
 
   const projectPath = path.join(DYNAMICS_DIR, projectName);

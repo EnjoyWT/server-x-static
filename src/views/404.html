@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 - 页面未找到</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        background-color: #f9fafb; /* 科技感浅灰底色 */
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+          Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        position: relative;
+      }
+
+      /* 依旧锁定在垂直方向的黄金分割点 38.2% */
+      main {
+        position: absolute;
+        top: 38.2%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        width: 100%;
+        padding: 0 24px;
+      }
+
+      /* 404 退居辅助位置：字号变小，颜色变浅 */
+      .code {
+        font-size: 16px;
+        font-weight: 600;
+        text-transform: uppercase; /* 确保英文大写 */
+        letter-spacing: 0.1em;
+        color: #9ca3af; /* 浅淡的灰色，不喧宾夺主 */
+        margin-bottom: 8px;
+      }
+
+      /* 提示语升级为主标题：字号加大、加粗，颜色换成有质感的深蓝灰 */
+      .message {
+        font-size: 24px;
+        font-weight: 600;
+        color: #1e293b; /* 充满科技质感的深石墨蓝灰 */
+        letter-spacing: -0.01em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="code">404 Error</div>
+      <h1 class="message">来到了未知的页面</h1>
+    </main>
+  </body>
+</html>

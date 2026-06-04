@@ -5,6 +5,7 @@
 ## 🚀 功能特性
 
 - **动态项目管理**: 自动扫描并提供 `dynamics` 目录下的静态项目
+- **后台开关管理**: 通过卡片式后台页面启用或关闭单个项目，无需重启服务
 - **API 接口**: 内置 RESTful API 服务
 - **安全防护**: 集成 Helmet 安全中间件
 - **容错处理**: 完善的错误处理和日志记录
@@ -25,9 +26,12 @@ server-x-static/
 │   ├── config/            # 配置文件
 │   ├── middleware/        # 中间件
 │   ├── routes/            # 路由模块
-│   │   ├── api.routes.js  # API路由
-│   │   └── home.routes.js # 主页路由
+│   │   ├── api.js         # API路由
+│   │   ├── admin.js       # 后台管理路由
+│   │   └── home.js        # 主页路由
+│   ├── services/          # 业务服务
 │   └── views/             # 视图模板
+├── data/                  # 本地状态数据
 └── package.json
 ```
 
@@ -59,7 +63,8 @@ npm start
 
 项目使用路径前缀 `/dyn`，访问方式如下：
 
-- **主页**: `http://localhost:6002/help/` - 项目列表和说明
+- **主页**: `http://localhost:6002/help/` - 已启用项目列表和说明
+- **后台管理**: `http://localhost:6002/admin/` - 卡片式项目启用/关闭管理
 - **动态项目**: `http://localhost:6002/dyn/{项目名}/` - 访问指定项目
 - **API 接口**: `http://localhost:6002/api/` - API 服务
 - **健康检查**: `http://localhost:6002/dyn/health` - 系统状态
@@ -68,7 +73,16 @@ npm start
 
 1. 在 `dynamics` 目录下创建项目文件夹
 2. 放入项目文件（必须包含 `index.html`）
-3. 重启服务器，新项目将自动可访问
+3. 刷新 `/admin/` 或 `/help/`，新项目默认启用并可访问，无需重启服务器
+
+### 启用/关闭项目
+
+1. 打开 `http://localhost:6002/admin/`
+2. 在项目卡片右侧点击 Switch 开关
+3. 状态会保存到 `data/project-status.json`
+4. 关闭后的项目会立即从 `/help/` 隐藏，并且 `/dyn/{项目名}/` 不再可访问
+
+如果 `data/project-status.json` 不存在、读取失败或格式异常，服务会记录错误并默认允许项目访问，避免配置文件问题导致静态项目整体不可用。
 
 ### API 接口
 
@@ -85,7 +99,8 @@ module.exports = {
   DEFAULT_PORT: 6002, // 默认端口
   DYNAMICS_DIR: "dynamics", // 动态项目目录
   PUBLIC_DIR: "public", // 静态资源目录
-  RESERVED_ROUTES: ["api", "public", "help", "health"], // 保留路由
+  PROJECT_STATUS_FILE: "data/project-status.json", // 项目启用状态文件
+  RESERVED_ROUTES: ["api", "public", "help", "admin", "health"], // 保留路由
 };
 ```
 
