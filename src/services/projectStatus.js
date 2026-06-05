@@ -78,6 +78,16 @@ async function isProjectEnabled(projectName) {
   return statusMap[projectName] !== false;
 }
 
+async function projectExists(projectName) {
+  if (!isSafeProjectName(projectName)) {
+    return false;
+  }
+
+  const projectPath = path.join(DYNAMICS_DIR, projectName);
+  const stats = await fs.stat(projectPath).catch(() => null);
+  return Boolean(stats && stats.isDirectory());
+}
+
 async function setProjectEnabled(projectName, enabled) {
   if (!isSafeProjectName(projectName)) {
     const error = new Error("Invalid project name.");
@@ -107,6 +117,8 @@ async function setProjectEnabled(projectName, enabled) {
 
 module.exports = {
   isProjectEnabled,
+  isSafeProjectName,
   listProjects,
+  projectExists,
   setProjectEnabled,
 };
