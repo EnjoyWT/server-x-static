@@ -32,6 +32,7 @@ process.on("unhandledRejection", (reason, promise) => {
 const apiRoutes = require("./src/routes/api");
 const adminRoutes = require("./src/routes/admin");
 const homeRoutes = require("./src/routes/home");
+const indexRoutes = require("./src/routes/index");
 const dynamicProjectMiddleware = require("./src/middleware/dynamicProject");
 const { notFound, errorHandler } = require("./src/middleware/error");
 
@@ -106,7 +107,10 @@ app.use(`/api`, apiRoutes);
 // 5. Admin routes
 app.use(`/admin`, adminRoutes);
 
-// 6. Home page route
+// 6. Root landing page
+app.use(`/`, indexRoutes);
+
+// 7. Help page route
 app.use(`/help`, homeRoutes);
 
 // --- Error Handling ---

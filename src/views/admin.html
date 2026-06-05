@@ -136,6 +136,23 @@
         background: rgba(248, 250, 252, 0.86);
       }
 
+      .logout-button {
+        border: 1px solid rgba(226, 232, 240, 0.62);
+        border-radius: 10px;
+        padding: 7px 11px;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.72);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .logout-button:hover {
+        border-color: rgba(203, 213, 225, 0.72);
+        color: #475569;
+        background: rgba(248, 250, 252, 0.86);
+      }
+
       .grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(210px, 260px));
@@ -348,6 +365,9 @@
           <span class="stat-item">全部 <strong id="totalCount">0</strong></span>
           <span class="stat-item">启用 <strong id="enabledCount">0</strong></span>
           <span class="stat-item">关闭 <strong id="disabledCount">0</strong></span>
+          <form method="post" action="/admin/logout">
+            <button class="logout-button" type="submit">退出</button>
+          </form>
         </div>
       </section>
 
@@ -451,12 +471,21 @@
           .join("");
       }
 
+      function redirectToLogin() {
+        window.location.href = "/admin/login";
+      }
+
       async function loadProjects() {
         grid.innerHTML = "";
 
         try {
           const response = await fetch("/admin/projects");
           const payload = await response.json();
+
+          if (response.status === 401) {
+            redirectToLogin();
+            return;
+          }
 
           if (!response.ok || !payload.success) {
             throw new Error(payload.message || "读取项目失败");
@@ -497,6 +526,11 @@
             body: JSON.stringify({ enabled }),
           });
           const payload = await response.json();
+
+          if (response.status === 401) {
+            redirectToLogin();
+            return;
+          }
 
           if (!response.ok || !payload.success) {
             throw new Error(payload.message || "更新失败");

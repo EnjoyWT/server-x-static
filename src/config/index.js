@@ -17,4 +17,8 @@ module.exports = {
 
   // Reserved route names (these will be ignored by dynamic project middleware)
   RESERVED_ROUTES: ["api", "public", "help", "admin", "health"],
+
+  // Admin credentials
+  ADMIN_USER: "tim",
+  ADMIN_PASSWORD: "tim123",
 };

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server X Static</title>
+    <style>
+      :root {
+        --bg: #f6f8fb;
+        --text: #0f172a;
+        --green: #22c55e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        position: relative;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(34, 197, 94, 0.12),
+            transparent 32rem
+          ),
+          radial-gradient(
+            circle at top right,
+            rgba(59, 130, 246, 0.1),
+            transparent 28rem
+          ),
+          linear-gradient(180deg, #ffffff 0%, var(--bg) 42%);
+      }
+
+      main {
+        position: absolute;
+        top: 38.2%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        padding: 32px;
+      }
+
+      .brand {
+        margin: 0 0 12px;
+        font-size: 30px;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        line-height: 1.1;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        color: #15803d;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .status::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="brand">SERVER-X-STATIC</p>
+      <p class="status">服务运行中</p>
+    </main>
+  </body>
+</html>
