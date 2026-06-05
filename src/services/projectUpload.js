@@ -129,7 +129,7 @@ async function copyDirectoryContents(sourceDir, targetDir) {
 
 async function publishProject(projectName, zipBuffer, options = {}) {
   const name = validateProjectName(projectName);
-  const enabledOnPublish = options.enabled !== false;
+  const mode = options.mode === "replace" ? "replace" : "create";
 
   if (!Buffer.isBuffer(zipBuffer) || zipBuffer.length === 0) {
     throw createHttpError("ZIP file is required.", 400);
@@ -142,7 +142,27 @@ async function publishProject(projectName, zipBuffer, options = {}) {
     );
   }
 
-  const overwritten = await projectStatus.projectExists(name);
+  const exists = await projectStatus.projectExists(name);
+
+  if (mode === "create" && exists) {
+    throw createHttpError(
+      "Project already exists. Use redeploy to update an existing project.",
+      409
+    );
+  }
+
+  if (mode === "replace" && !exists) {
+    throw createHttpError("Project not found.", 404);
+  }
+
+  let enabledOnPublish;
+  if (mode === "replace" && options.enabled === undefined) {
+    enabledOnPublish = await projectStatus.isProjectEnabled(name);
+  } else {
+    enabledOnPublish = options.enabled !== false;
+  }
+
+  const overwritten = mode === "replace";
   const tempRoot = path.join(
     os.tmpdir(),
     `server-x-static-upload-${crypto.randomBytes(8).toString("hex")}`

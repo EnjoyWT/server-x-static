@@ -184,7 +184,7 @@
         border-radius: 18px;
         background: linear-gradient(145deg, var(--panel), var(--panel-strong));
         box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
-        overflow: hidden;
+        overflow: visible;
       }
 
       .card.enabled {
@@ -212,12 +212,89 @@
         gap: 12px;
       }
 
+      .card-title-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        flex: 1;
+        min-width: 0;
+      }
+
       .project-name {
         margin: 0;
         font-size: 17px;
         line-height: 1.18;
         letter-spacing: -0.025em;
         word-break: break-word;
+      }
+
+      .card-menu-wrap {
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      .card-menu-button {
+        border: 0px solid rgba(203, 213, 225, 0.9);
+        border-radius: 6px;
+        padding: 1px 5px;
+        color: #475569;
+        background: rgba(248, 250, 252, 0.95);
+        font-size: 16px;
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+      }
+
+      .card-menu-button:hover,
+      .card-menu-button.is-open {
+        color: #1e293b;
+        border-color: rgba(148, 163, 184, 0.95);
+        background: #ffffff;
+      }
+
+      .card-menu-dropdown {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        z-index: 30;
+        display: none;
+        min-width: 128px;
+        padding: 4px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #ffffff;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+      }
+
+      .card-menu-dropdown.is-open {
+        display: block;
+      }
+
+      .card-menu-item {
+        display: block;
+        width: 100%;
+        border: none;
+        border-radius: 7px;
+        padding: 8px 10px;
+        color: #334155;
+        background: transparent;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .card-menu-item:hover {
+        background: #f8fafc;
+      }
+
+      .card-menu-item.danger {
+        color: #b91c1c;
+      }
+
+      .card-menu-item.danger:hover {
+        background: #fef2f2;
       }
 
       .path-row {
@@ -497,6 +574,12 @@
         border-color: rgba(239, 68, 68, 0.55);
       }
 
+      .field-input:disabled {
+        color: #64748b;
+        background: #f8fafc;
+        cursor: not-allowed;
+      }
+
       .field-hint,
       .field-warning,
       .field-error {
@@ -548,6 +631,34 @@
         border-color: rgba(34, 197, 94, 0.55);
         color: #ffffff;
         background: var(--green);
+      }
+
+      .modal-button.danger {
+        border-color: rgba(239, 68, 68, 0.55);
+        color: #ffffff;
+        background: var(--red);
+      }
+
+      .delete-modal-text {
+        margin: 0;
+        color: #334155;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .delete-modal-name {
+        color: #0f172a;
+        font-weight: 800;
+      }
+
+      .delete-modal-warning {
+        margin: 10px 0 0;
+        color: #b91c1c;
+        font-size: 13px;
+      }
+
+      .field-error.is-visible {
+        display: block;
       }
 
       .modal-button:disabled {
@@ -662,6 +773,49 @@
       <section class="grid" id="projectGrid" aria-live="polite"></section>
     </main>
 
+    <div class="modal-backdrop" id="deleteModal" aria-hidden="true">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="deleteModalTitle"
+      >
+        <div class="modal-header">
+          <h2 class="modal-title" id="deleteModalTitle">删除项目</h2>
+          <button
+            class="modal-close"
+            type="button"
+            id="closeDeleteModal"
+            aria-label="关闭"
+          >
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="delete-modal-text">
+            确认删除项目
+            <span class="delete-modal-name" id="deleteProjectName"></span>？
+          </p>
+          <p class="delete-modal-warning">
+            此操作不可恢复，项目文件将被永久删除。
+          </p>
+          <p class="field-error" id="deleteError" hidden></p>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="modal-button secondary"
+            type="button"
+            id="cancelDelete"
+          >
+            取消
+          </button>
+          <button class="modal-button danger" type="button" id="confirmDelete">
+            确认删除
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-backdrop" id="publishModal" aria-hidden="true">
       <div
         class="modal"
@@ -696,13 +850,16 @@
               <p class="field-hint" id="projectPathHint">
                 访问路径 /dyn/项目名/
               </p>
-              <p class="field-warning" id="overwriteWarning" hidden>
-                将覆盖已有项目，上传后会替换现有文件。
+              <p class="field-error" id="publishNameExists" hidden>
+                项目名已存在，请更换名称，或通过卡片「重新发布」更新。
+              </p>
+              <p class="field-warning" id="redeployWarning" hidden>
+                将替换当前项目的全部文件。
               </p>
               <p class="field-error" id="publishError" hidden></p>
             </div>
 
-            <label class="checkbox-row">
+            <label class="checkbox-row" id="enableOnPublishRow">
               <input
                 id="enableOnPublish"
                 name="enabled"
@@ -758,6 +915,7 @@
       const openPublishModalButton =
         document.querySelector("#openPublishModal");
       const publishModal = document.querySelector("#publishModal");
+      const publishModalTitle = document.querySelector("#publishModalTitle");
       const closePublishModalButton =
         document.querySelector("#closePublishModal");
       const cancelPublishButton = document.querySelector("#cancelPublish");
@@ -766,11 +924,20 @@
       const zipInput = document.querySelector("#zipInput");
       const projectNameInput = document.querySelector("#projectNameInput");
       const projectPathHint = document.querySelector("#projectPathHint");
-      const overwriteWarning = document.querySelector("#overwriteWarning");
+      const publishNameExists = document.querySelector("#publishNameExists");
+      const redeployWarning = document.querySelector("#redeployWarning");
       const publishError = document.querySelector("#publishError");
       const enableOnPublish = document.querySelector("#enableOnPublish");
+      const enableOnPublishRow = document.querySelector("#enableOnPublishRow");
       const submitPublishButton = document.querySelector("#submitPublish");
       const uploadProgress = document.querySelector("#uploadProgress");
+      const deleteModal = document.querySelector("#deleteModal");
+      const closeDeleteModalButton =
+        document.querySelector("#closeDeleteModal");
+      const cancelDeleteButton = document.querySelector("#cancelDelete");
+      const confirmDeleteButton = document.querySelector("#confirmDelete");
+      const deleteProjectNameEl = document.querySelector("#deleteProjectName");
+      const deleteError = document.querySelector("#deleteError");
       const totalCount = document.querySelector("#totalCount");
       const enabledCountEl = document.querySelector("#enabledCount");
       const disabledCount = document.querySelector("#disabledCount");
@@ -778,7 +945,10 @@
       let allProjects = [];
       let selectedZipFile = null;
       let isPublishing = false;
+      let publishMode = "create";
       let highlightProjectName = "";
+      let pendingDeleteProjectName = "";
+      let isDeleting = false;
 
       function escapeHtml(value) {
         return String(value).replace(
@@ -841,7 +1011,23 @@
             return `
               <article class="card ${statusClass}${highlightClass}" data-project-card="${escapeHtml(project.name)}">
                 <div class="card-top">
-                  <h2 class="project-name">${escapeHtml(project.name)}</h2>
+                  <div class="card-title-group">
+                    <h2 class="project-name">${escapeHtml(project.name)}</h2>
+                    <div class="card-menu-wrap">
+                      <button
+                        class="card-menu-button"
+                        type="button"
+                        data-card-menu="${escapeHtml(project.name)}"
+                        aria-label="${escapeHtml(project.name)} 更多操作"
+                        aria-haspopup="menu"
+                        aria-expanded="false"
+                      >⋮</button>
+                      <div class="card-menu-dropdown" data-card-menu-dropdown="${escapeHtml(project.name)}" role="menu">
+                        <button class="card-menu-item" type="button" role="menuitem" data-action="redeploy" data-project="${escapeHtml(project.name)}">重新发布</button>
+                        <button class="card-menu-item danger" type="button" role="menuitem" data-action="delete" data-project="${escapeHtml(project.name)}">删除</button>
+                      </div>
+                    </div>
+                  </div>
                   <label class="switch" aria-label="切换 ${escapeHtml(project.name)} 启用状态">
                     <input type="checkbox" data-project-toggle="${escapeHtml(project.name)}" ${project.enabled ? "checked" : ""}>
                     <span class="slider"></span>
@@ -894,9 +1080,15 @@
         publishError.textContent = message;
       }
 
+      function getPublishSubmitLabel() {
+        return publishMode === "replace" ? "确认重新发布" : "发布";
+      }
+
       function updatePublishFormState() {
         const projectName = projectNameInput.value.trim();
         const nameValid = isValidProjectName(projectName);
+        const nameExists = nameValid && projectExistsByName(projectName);
+        const isCreateBlocked = publishMode === "create" && nameExists;
 
         projectNameInput.classList.toggle(
           "is-invalid",
@@ -905,11 +1097,10 @@
         projectPathHint.textContent = nameValid
           ? `访问路径 /dyn/${encodeURIComponent(projectName)}/`
           : "项目名仅支持字母、数字、连字符和下划线";
-        overwriteWarning.hidden = !(
-          nameValid && projectExistsByName(projectName)
-        );
+        publishNameExists.hidden = !isCreateBlocked;
+        redeployWarning.hidden = publishMode !== "replace";
         submitPublishButton.disabled =
-          isPublishing || !selectedZipFile || !nameValid;
+          isPublishing || !selectedZipFile || !nameValid || isCreateBlocked;
       }
 
       function renderSelectedFile() {
@@ -945,7 +1136,7 @@
         selectedZipFile = file;
         setPublishError("");
 
-        if (!projectNameInput.value.trim()) {
+        if (publishMode === "create" && !projectNameInput.value.trim()) {
           const derivedName = deriveProjectNameFromFile(file);
           if (derivedName) {
             projectNameInput.value = derivedName;
@@ -957,14 +1148,21 @@
       }
 
       function resetPublishForm() {
+        publishMode = "create";
         selectedZipFile = null;
         zipInput.value = "";
         projectNameInput.value = "";
+        projectNameInput.disabled = false;
+        publishModalTitle.textContent = "发布项目";
         enableOnPublish.checked = true;
+        enableOnPublishRow.hidden = false;
+        publishNameExists.hidden = true;
+        redeployWarning.hidden = true;
         setPublishError("");
         uploadProgress.classList.remove("is-visible");
         renderSelectedFile();
         updatePublishFormState();
+        submitPublishButton.textContent = getPublishSubmitLabel();
       }
 
       function openPublishModal() {
@@ -972,6 +1170,20 @@
         publishModal.classList.add("is-open");
         publishModal.setAttribute("aria-hidden", "false");
         projectNameInput.focus();
+      }
+
+      function openRedeployModal(projectName) {
+        resetPublishForm();
+        publishMode = "replace";
+        publishModalTitle.textContent = `重新发布 · ${projectName}`;
+        projectNameInput.value = projectName;
+        projectNameInput.disabled = true;
+        enableOnPublishRow.hidden = true;
+        redeployWarning.hidden = false;
+        submitPublishButton.textContent = getPublishSubmitLabel();
+        publishModal.classList.add("is-open");
+        publishModal.setAttribute("aria-hidden", "false");
+        updatePublishFormState();
       }
 
       function closePublishModal(force = false) {
@@ -986,13 +1198,89 @@
         }
       }
 
+      function setDeleteError(message) {
+        if (!message) {
+          deleteError.hidden = true;
+          deleteError.textContent = "";
+          return;
+        }
+
+        deleteError.hidden = false;
+        deleteError.textContent = message;
+      }
+
+      function openDeleteModal(projectName) {
+        pendingDeleteProjectName = projectName;
+        deleteProjectNameEl.textContent = projectName;
+        setDeleteError("");
+        deleteModal.classList.add("is-open");
+        deleteModal.setAttribute("aria-hidden", "false");
+        confirmDeleteButton.disabled = false;
+        confirmDeleteButton.textContent = "确认删除";
+      }
+
+      function closeDeleteModal(force = false) {
+        if (isDeleting && !force) {
+          return;
+        }
+
+        deleteModal.classList.remove("is-open");
+        deleteModal.setAttribute("aria-hidden", "true");
+        pendingDeleteProjectName = "";
+        setDeleteError("");
+      }
+
+      function setDeletingState(active) {
+        isDeleting = active;
+        confirmDeleteButton.disabled = active;
+        confirmDeleteButton.textContent = active ? "删除中…" : "确认删除";
+        cancelDeleteButton.disabled = active;
+        closeDeleteModalButton.disabled = active;
+      }
+
+      async function confirmDeleteProject() {
+        const projectName = pendingDeleteProjectName;
+        if (!projectName || isDeleting) {
+          return;
+        }
+
+        setDeletingState(true);
+        setDeleteError("");
+
+        try {
+          const response = await fetch(
+            `/admin/projects/${encodeURIComponent(projectName)}`,
+            { method: "DELETE" },
+          );
+          const payload = await response.json();
+
+          if (response.status === 401) {
+            redirectToLogin();
+            return;
+          }
+
+          if (!response.ok || !payload.success) {
+            throw new Error(payload.message || "删除失败");
+          }
+
+          closeDeleteModal(true);
+          await loadProjects();
+        } catch (error) {
+          setDeleteError(error.message);
+        } finally {
+          setDeletingState(false);
+        }
+      }
+
       function setPublishingState(active) {
         isPublishing = active;
         submitPublishButton.disabled =
           active ||
           !selectedZipFile ||
           !isValidProjectName(projectNameInput.value.trim());
-        submitPublishButton.textContent = active ? "发布中…" : "发布";
+        submitPublishButton.textContent = active
+          ? "发布中…"
+          : getPublishSubmitLabel();
         cancelPublishButton.disabled = active;
         closePublishModalButton.disabled = active;
         openPublishModalButton.disabled = active;
@@ -1009,9 +1297,14 @@
           return;
         }
 
-        if (projectExistsByName(projectName)) {
+        if (publishMode === "create" && projectExistsByName(projectName)) {
+          updatePublishFormState();
+          return;
+        }
+
+        if (publishMode === "replace") {
           const confirmed = window.confirm(
-            `项目「${projectName}」已存在，上传将完全替换现有文件，是否继续？`,
+            `将完全替换项目「${projectName}」的现有文件，是否继续？`,
           );
           if (!confirmed) {
             return;
@@ -1024,7 +1317,13 @@
         const formData = new FormData();
         formData.append("file", selectedZipFile);
         formData.append("name", projectName);
-        formData.append("enabled", enableOnPublish.checked ? "true" : "false");
+        formData.append("mode", publishMode);
+        if (publishMode === "create") {
+          formData.append(
+            "enabled",
+            enableOnPublish.checked ? "true" : "false",
+          );
+        }
 
         try {
           const response = await fetch("/admin/projects/upload", {
@@ -1138,7 +1437,56 @@
         updateProject(input.dataset.projectToggle, input.checked, input);
       });
 
+      function closeAllCardMenus() {
+        grid.querySelectorAll(".card-menu-dropdown.is-open").forEach((menu) => {
+          menu.classList.remove("is-open");
+        });
+        grid.querySelectorAll(".card-menu-button.is-open").forEach((button) => {
+          button.classList.remove("is-open");
+          button.setAttribute("aria-expanded", "false");
+        });
+      }
+
+      function toggleCardMenu(projectName) {
+        const menu = grid.querySelector(
+          `[data-card-menu-dropdown="${CSS.escape(projectName)}"]`,
+        );
+        const button = grid.querySelector(
+          `[data-card-menu="${CSS.escape(projectName)}"]`,
+        );
+        if (!menu || !button) return;
+
+        const willOpen = !menu.classList.contains("is-open");
+        closeAllCardMenus();
+
+        if (willOpen) {
+          menu.classList.add("is-open");
+          button.classList.add("is-open");
+          button.setAttribute("aria-expanded", "true");
+        }
+      }
+
       grid.addEventListener("click", async (event) => {
+        const menuButton = event.target.closest("[data-card-menu]");
+        if (menuButton) {
+          event.stopPropagation();
+          toggleCardMenu(menuButton.dataset.cardMenu);
+          return;
+        }
+
+        const menuItem = event.target.closest("[data-action]");
+        if (menuItem) {
+          event.stopPropagation();
+          closeAllCardMenus();
+
+          if (menuItem.dataset.action === "redeploy") {
+            openRedeployModal(menuItem.dataset.project);
+          } else if (menuItem.dataset.action === "delete") {
+            openDeleteModal(menuItem.dataset.project);
+          }
+          return;
+        }
+
         const button = event.target.closest("[data-copy-path]");
         if (!button) return;
 
@@ -1153,12 +1501,26 @@
         }
       });
 
+      document.addEventListener("click", () => {
+        closeAllCardMenus();
+      });
+
       searchInput.addEventListener("input", () => {
         renderProjects(getFilteredProjects());
       });
 
       refreshButton.addEventListener("click", loadProjects);
       openPublishModalButton.addEventListener("click", openPublishModal);
+      closeDeleteModalButton.addEventListener("click", () =>
+        closeDeleteModal(),
+      );
+      cancelDeleteButton.addEventListener("click", () => closeDeleteModal());
+      confirmDeleteButton.addEventListener("click", confirmDeleteProject);
+      deleteModal.addEventListener("click", (event) => {
+        if (event.target === deleteModal) {
+          closeDeleteModal();
+        }
+      });
       closePublishModalButton.addEventListener("click", () =>
         closePublishModal(),
       );
@@ -1201,6 +1563,8 @@
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
+          closeAllCardMenus();
+          closeDeleteModal();
           closePublishModal();
         }
       });

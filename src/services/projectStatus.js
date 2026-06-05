@@ -115,7 +115,37 @@ async function setProjectEnabled(projectName, enabled) {
   };
 }
 
+async function deleteProject(projectName) {
+  if (!isSafeProjectName(projectName)) {
+    const error = new Error("Invalid project name.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const projectPath = path.join(DYNAMICS_DIR, projectName);
+  const stats = await fs.stat(projectPath).catch(() => null);
+
+  if (!stats || !stats.isDirectory()) {
+    const error = new Error("Project not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  await fs.rm(projectPath, { recursive: true, force: true });
+
+  const statusMap = await readStatusMap();
+  if (Object.prototype.hasOwnProperty.call(statusMap, projectName)) {
+    delete statusMap[projectName];
+    await writeStatusMap(statusMap);
+  }
+
+  return {
+    name: projectName,
+  };
+}
+
 module.exports = {
+  deleteProject,
   isProjectEnabled,
   isSafeProjectName,
   listProjects,

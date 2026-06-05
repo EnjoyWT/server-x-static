@@ -126,6 +126,22 @@ router.get("/projects", async (req, res, next) => {
   }
 });
 
+router.delete("/projects/:name", async (req, res, next) => {
+  try {
+    const project = await projectStatus.deleteProject(req.params.name);
+    res.json({ success: true, data: { project } });
+  } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    next(error);
+  }
+});
+
 router.patch("/projects/:name", async (req, res, next) => {
   try {
     const { enabled } = req.body;
@@ -167,11 +183,15 @@ router.post(
   async (req, res, next) => {
     try {
       const projectName = String(req.body.name || "").trim();
+      const mode = req.body.mode === "replace" ? "replace" : "create";
       const enabledRaw = req.body.enabled;
-      const enabled =
-        enabledRaw === undefined ||
-        enabledRaw === "true" ||
-        enabledRaw === true;
+      const hasEnabledField = enabledRaw !== undefined && enabledRaw !== "";
+      const enabled = enabledRaw === "true" || enabledRaw === true;
+      const uploadOptions = { mode };
+
+      if (hasEnabledField) {
+        uploadOptions.enabled = enabled;
+      }
 
       if (!req.file) {
         return res.status(400).json({
@@ -183,7 +203,7 @@ router.post(
       const result = await projectUpload.publishProject(
         projectName,
         req.file.buffer,
-        { enabled }
+        uploadOptions
       );
 
       res.json({
